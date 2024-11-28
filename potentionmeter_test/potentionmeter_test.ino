@@ -1,5 +1,5 @@
 const int potPins[] = {A0, A1, A2, A3};  // 电位器连接的模拟输入引脚数组
-const int motorPins[] = {6, 7, 8, 9};    // 电机驱动连接的 PWM 输出引脚数组
+const int motorPins[] = {A4, A5, A6, A7};    // 电机驱动连接的 PWM 输出引脚数组
 int potValues[4];                        // 存储每个电位器的读入值
 int motorSpeeds[4];                      // 存储每个电位器映射后的 PWM 值
 
