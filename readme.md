@@ -1,0 +1,1 @@
+This repository store several .ino files for a drone project, including the test of lcd, mpu6050, potentiometer control and final pid control. Good luck.
