@@ -2,57 +2,57 @@
 #include <MPU6050.h>
 #include <PID_v1.h>
 
-// 初始化MPU6050对象
+// Initialize MPU6050 object
 MPU6050 mpu;
 
-// 目标值（设为水平静止状态）
+// Target values (set to a level and stationary state)
 double setpointPitch = 0;
 double setpointRoll = 0;
 double setpointYaw = 0;
 
-// MPU6050姿态输入
+// MPU6050 attitude inputs
 double inputPitch, inputRoll, inputYaw;
 
-// PID输出值
+// PID output values
 double outputPitch, outputRoll, outputYaw;
 
-// PID控制器
+// PID controllers
 PID pidPitch(&inputPitch, &outputPitch, &setpointPitch, 2.0, 5.0, 1.0, DIRECT);
 PID pidRoll(&inputRoll, &outputRoll, &setpointRoll, 2.0, 5.0, 1.0, DIRECT);
 PID pidYaw(&inputYaw, &outputYaw, &setpointYaw, 2.0, 5.0, 1.0, DIRECT);
 
-// 电机引脚定义
-const int motorLeftTop = 6;  // 左上
-const int motorRightTop = 9; // 右上
-const int motorLeftBottom = 5;  // 左下
-const int motorRightBottom = 3; // 右下
+// Motor pin definitions
+const int motorLeftTop = 6;  // Top-left
+const int motorRightTop = 9; // Top-right
+const int motorLeftBottom = 5;  // Bottom-left
+const int motorRightBottom = 3; // Bottom-right
 
-// 电机基础速度（保证无人机在水平状态下悬停）
+// Base motor speed (ensures the drone hovers in a level state)
 int baseSpeed = 150;
 
 void setup() {
-  // 初始化串口
+  // Initialize serial communication
   Serial.begin(115200);
   
-  // 初始化MPU6050
+  // Initialize MPU6050
   Wire.begin();
   mpu.initialize();
   if (!mpu.testConnection()) {
     Serial.println("MPU6050 connection failed!");
-    while (1); // 停止程序
+    while (1); // Halt the program
   }
   
-  // 初始化PID控制器
+  // Initialize PID controllers
   pidPitch.SetMode(AUTOMATIC);
   pidRoll.SetMode(AUTOMATIC);
   pidYaw.SetMode(AUTOMATIC);
 
-  // 设置输出范围
-  pidPitch.SetOutputLimits(-50, 50); // 调整范围，可根据实际需求修改
+  // Set output limits
+  pidPitch.SetOutputLimits(-50, 50); // Adjust the range as needed
   pidRoll.SetOutputLimits(-50, 50);
   pidYaw.SetOutputLimits(-50, 50);
   
-  // 配置电机引脚
+  // Configure motor pins
   pinMode(motorLeftTop, OUTPUT);
   pinMode(motorRightTop, OUTPUT);
   pinMode(motorLeftBottom, OUTPUT);
@@ -60,39 +60,39 @@ void setup() {
 }
 
 void loop() {
-  // 从MPU6050获取角速度和加速度数据
+  // Retrieve angular velocity and acceleration data from MPU6050
   int16_t ax, ay, az, gx, gy, gz;
   mpu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
   
-  // 姿态角计算
+  // Calculate attitude angles
   inputPitch = atan2(ay, az) * 180 / PI;
   inputRoll = atan2(-ax, az) * 180 / PI;
-  inputYaw = gz / 131.0; // 简化Yaw计算，使用陀螺仪数据
+  inputYaw = gz / 131.0; // Simplified yaw calculation using gyroscope data
 
-  // 更新PID控制器
+  // Update PID controllers
   pidPitch.Compute();
   pidRoll.Compute();
   pidYaw.Compute();
 
-  // 根据PID输出调整电机速度
-  int motorLT = baseSpeed + outputPitch + outputRoll - outputYaw; // 左上
-  int motorRT = baseSpeed + outputPitch - outputRoll + outputYaw; // 右上
-  int motorLB = baseSpeed - outputPitch + outputRoll + outputYaw; // 左下
-  int motorRB = baseSpeed - outputPitch - outputRoll - outputYaw; // 右下
+  // Adjust motor speeds based on PID output
+  int motorLT = baseSpeed + outputPitch + outputRoll - outputYaw; // Top-left
+  int motorRT = baseSpeed + outputPitch - outputRoll + outputYaw; // Top-right
+  int motorLB = baseSpeed - outputPitch + outputRoll + outputYaw; // Bottom-left
+  int motorRB = baseSpeed - outputPitch - outputRoll - outputYaw; // Bottom-right
 
-  // 限制电机速度范围（0-255）
+  // Limit motor speed range (0-255)
   motorLT = constrain(motorLT, 0, 255);
   motorRT = constrain(motorRT, 0, 255);
   motorLB = constrain(motorLB, 0, 255);
   motorRB = constrain(motorRB, 0, 255);
 
-  // 输出到电机
+  // Output to motors
   analogWrite(motorLeftTop, motorLT);
   analogWrite(motorRightTop, motorRT);
   analogWrite(motorLeftBottom, motorLB);
   analogWrite(motorRightBottom, motorRB);
 
-  // 输出调试信息
+  // Output debug information
   Serial.print("Pitch: ");
   Serial.print(inputPitch);
   Serial.print(" | Roll: ");
@@ -108,5 +108,5 @@ void loop() {
   Serial.print(" ");
   Serial.println(motorRB);
 
-  delay(10); // 控制循环频率
+  delay(10); // Control loop frequency
 }

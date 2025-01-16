@@ -1,29 +1,29 @@
-const int potPins[] = {A0, A1, A2, A3};  // 电位器连接的模拟输入引脚数组
-const int motorPins[] = {3, 9, 10, 11};    // 电机驱动连接的 PWM 输出引脚数组
-int potValues[4];                        // 存储每个电位器的读入值
-int motorSpeeds[4];                      // 存储每个电位器映射后的 PWM 值
+const int potPins[] = {A0, A1, A2, A3};  // Array of analog input pins connected to potentiometers
+const int motorPins[] = {3, 9, 10, 11};  // Array of PWM output pins connected to motor drivers
+int potValues[4];                        // Array to store the read values of each potentiometer
+int motorSpeeds[4];                      // Array to store the mapped PWM values for each motor
 
 void setup() {
-  // 设置电机引脚为输出模式
+  // Set motor pins as output mode
   for (int i = 0; i < 4; i++) {
     pinMode(motorPins[i], OUTPUT);
   }
-  Serial.begin(9600); // 初始化串口通信
+  Serial.begin(9600); // Initialize serial communication
 }
 
 void loop() {
   for (int i = 0; i < 4; i++) {
-    // 读取电位器的模拟值（0 - 1023）
+    // Read the analog value from the potentiometer (0 - 1023)
     potValues[i] = analogRead(potPins[i]);
 
-    // 将电位器的值映射到 PWM 范围（0 - 255）
+    // Map the potentiometer value to the PWM range (0 - 255)
     motorSpeeds[i] = map(potValues[i], 0, 1023, 0, 255);
 
-    // 输出 PWM 信号到对应电机驱动引脚
+    // Output PWM signal to the corresponding motor driver pin
     analogWrite(motorPins[i], motorSpeeds[i]);
   }
 
-  // 在串口监视器上显示每个电位器的值和对应的 PWM 值
+  // Display the values of each potentiometer and the corresponding PWM values in the serial monitor
   Serial.println("Potentiometer Values and Motor Speeds:");
   for (int i = 0; i < 4; i++) {
     Serial.print("A");
@@ -34,5 +34,5 @@ void loop() {
     Serial.println(motorSpeeds[i]);
   }
   
-  delay(500); // 延时以便观察数值变化
+  delay(500); // Delay to observe value changes
 }
